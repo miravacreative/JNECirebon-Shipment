@@ -297,21 +297,24 @@ export const updateUserPassword = (userId: string, newPassword: string): boolean
 }
 
 export const getAllUsers = (): User[] => {
+  // Load from localStorage if available
   if (typeof window !== 'undefined') {
     const savedUsers = localStorage.getItem('dashboard_users')
     if (savedUsers) {
       const parsedUsers = JSON.parse(savedUsers)
-      // 🔁 Rehydrate date fields
-      Object.keys(parsedUsers).forEach((key) => {
-        const u = parsedUsers[key]
-        u.createdAt = new Date(u.createdAt)
-        if (u.lastLogin) u.lastLogin = new Date(u.lastLogin)
+//
+      Object.values(parsedUsers).forEach((user: any) => {
+        if (user.createdAt) user.createdAt = new Date(user.createdAt)
+        if (user.lastLogin) user.lastLogin = new Date(user.lastLogin)
       })
+
       Object.assign(users, parsedUsers)
     }
   }
+
   return Object.values(users).map(({ password, ...user }) => user)
 }
+
 
 export const getUserById = (id: string): User | null => {
   if (typeof window !== 'undefined') {
