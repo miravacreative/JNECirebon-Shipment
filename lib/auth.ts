@@ -297,11 +297,16 @@ export const updateUserPassword = (userId: string, newPassword: string): boolean
 }
 
 export const getAllUsers = (): User[] => {
-  // Load from localStorage if available
   if (typeof window !== 'undefined') {
     const savedUsers = localStorage.getItem('dashboard_users')
     if (savedUsers) {
       const parsedUsers = JSON.parse(savedUsers)
+      // 🔁 Rehydrate date fields
+      Object.keys(parsedUsers).forEach((key) => {
+        const u = parsedUsers[key]
+        u.createdAt = new Date(u.createdAt)
+        if (u.lastLogin) u.lastLogin = new Date(u.lastLogin)
+      })
       Object.assign(users, parsedUsers)
     }
   }
@@ -309,11 +314,15 @@ export const getAllUsers = (): User[] => {
 }
 
 export const getUserById = (id: string): User | null => {
-  // Load from localStorage if available
   if (typeof window !== 'undefined') {
     const savedUsers = localStorage.getItem('dashboard_users')
     if (savedUsers) {
       const parsedUsers = JSON.parse(savedUsers)
+      Object.keys(parsedUsers).forEach((key) => {
+        const u = parsedUsers[key]
+        u.createdAt = new Date(u.createdAt)
+        if (u.lastLogin) u.lastLogin = new Date(u.lastLogin)
+      })
       Object.assign(users, parsedUsers)
     }
   }
@@ -326,11 +335,15 @@ export const getUserById = (id: string): User | null => {
 }
 
 export const getAllPages = (): Page[] => {
-  // Load from localStorage if available
   if (typeof window !== 'undefined') {
     const savedPages = localStorage.getItem('dashboard_pages')
     if (savedPages) {
       const parsedPages = JSON.parse(savedPages)
+      Object.keys(parsedPages).forEach((key) => {
+        const p = parsedPages[key]
+        p.createdAt = new Date(p.createdAt)
+        p.updatedAt = new Date(p.updatedAt)
+      })
       Object.assign(pages, parsedPages)
     }
   }
@@ -338,11 +351,15 @@ export const getAllPages = (): Page[] => {
 }
 
 export const getPageById = (id: string): Page | null => {
-  // Load from localStorage if available
   if (typeof window !== 'undefined') {
     const savedPages = localStorage.getItem('dashboard_pages')
     if (savedPages) {
       const parsedPages = JSON.parse(savedPages)
+      Object.keys(parsedPages).forEach((key) => {
+        const p = parsedPages[key]
+        p.createdAt = new Date(p.createdAt)
+        p.updatedAt = new Date(p.updatedAt)
+      })
       Object.assign(pages, parsedPages)
     }
   }
@@ -456,7 +473,7 @@ export const logActivity = (userId: string, action: string, details: string): vo
     userId,
     action,
     details,
-    timestamp: new Date(),
+    timestamp: new Date(activity.timestamp),
     ipAddress: "192.168.1." + Math.floor(Math.random() * 255),
   }
 
