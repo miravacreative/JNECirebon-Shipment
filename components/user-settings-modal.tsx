@@ -3,8 +3,8 @@
 import type React from "react"
 
 import { useState, useEffect } from "react"
-import { X, Save, Settings, Eye, EyeOff } from "lucide-react"
-import { updateUser, assignPagesToUser, getAllPages, type User as AuthUser, type Page } from "@/lib/auth"
+import { X, Save, Settings, Eye, EyeOff, Lock, Key } from "lucide-react"
+import { updateUser, assignPagesToUser, getAllPages, updateUserPassword, type User as AuthUser, type Page } from "@/lib/auth"
 
 interface UserSettingsModalProps {
   isOpen: boolean
@@ -22,6 +22,8 @@ export function UserSettingsModal({ isOpen, onClose, onSuccess, user }: UserSett
     role: "user" as "user" | "admin" | "developer",
     isActive: true,
     assignedPages: [] as string[],
+    newPassword: "",
+    confirmPassword: "",
   })
   const [availablePages, setAvailablePages] = useState<Page[]>([])
   const [loading, setLoading] = useState(false)
@@ -37,6 +39,8 @@ export function UserSettingsModal({ isOpen, onClose, onSuccess, user }: UserSett
         role: user.role,
         isActive: user.isActive,
         assignedPages: user.assignedPages || [],
+        newPassword: "",
+        confirmPassword: "",
       })
       setAvailablePages(getAllPages())
     }
@@ -47,6 +51,16 @@ export function UserSettingsModal({ isOpen, onClose, onSuccess, user }: UserSett
     if (!user) return
 
     setLoading(true)
+    
+    // Check password validation if password is being changed
+    if (formData.newPassword) {
+      if (formData.newPassword !== formData.confirmPassword) {
+        alert("Passwords don't match!")
+        setLoading(false)
+        return
+      }
+    }
+    
     try {
       // Update user information
       const success = updateUser(user.id, {
@@ -60,6 +74,11 @@ export function UserSettingsModal({ isOpen, onClose, onSuccess, user }: UserSett
         // Update page assignments for regular users
         if (formData.role === "user") {
           assignPagesToUser(user.id, formData.assignedPages)
+        }
+        
+        // Update password if provided
+        if (formData.newPassword) {
+          updateUserPassword(user.id, formData.newPassword)
         }
         onSuccess()
       }
@@ -176,6 +195,41 @@ export function UserSettingsModal({ isOpen, onClose, onSuccess, user }: UserSett
                   />
                   <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Active User</span>
                 </label>
+              </div>
+            </div>
+          </div>
+
+          {/* Password Change Section */}
+          <div className="space-y-4 border-t border-gray-200 dark:border-gray-700 pt-4">
+            <h3 className="text-lg font-semibold text-gray-800 dark:text-white flex items-center gap-2">
+              <Lock size={18} />
+              Change Password
+            </h3>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <Key size={16} className="inline mr-2" />
+                  New Password
+                </label>
+                <input
+                  type="password"
+                  value={formData.newPassword}
+                  onChange={(e) => setFormData({ ...formData, newPassword: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                  placeholder="Leave empty to keep current password"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Confirm New Password</label>
+                <input
+                  type="password"
+                  value={formData.confirmPassword}
+                  onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                  placeholder="Confirm new password"
+                />
               </div>
             </div>
           </div>

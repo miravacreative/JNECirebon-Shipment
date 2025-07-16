@@ -23,6 +23,16 @@ export default function HomePage() {
     password: "",
   })
 
+  // Load saved data on component mount
+  useEffect(() => {
+    // This will trigger the localStorage loading in auth functions
+    if (typeof window !== 'undefined') {
+      // Force load saved data
+      getAllUsers()
+      getAllPages()
+    }
+  }, [])
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)

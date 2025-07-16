@@ -46,6 +46,10 @@ export function UserCreationModal({ isOpen, onClose, onSuccess }: UserCreationMo
           role: "user",
           assignedPages: [],
         })
+        // Force reload data to show new user immediately
+        setTimeout(() => {
+          window.location.reload()
+        }, 500)
       } else {
         setError("Username already exists!")
       }

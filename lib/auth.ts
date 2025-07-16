@@ -273,15 +273,50 @@ export const createUser = (userData: {
   }
 
   users[userData.username] = newUser
+  // Save to localStorage for persistence
+  if (typeof window !== 'undefined') {
+    localStorage.setItem('dashboard_users', JSON.stringify(users))
+  }
   logActivity("system", "user_create", `New user ${newUser.name} created with role ${newUser.role}`)
   return true
 }
 
+export const updateUserPassword = (userId: string, newPassword: string): boolean => {
+  const userEntry = Object.entries(users).find(([_, user]) => user.id === userId)
+  if (userEntry) {
+    const [username, user] = userEntry
+    users[username].password = newPassword
+    // Save to localStorage for persistence
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('dashboard_users', JSON.stringify(users))
+    }
+    logActivity(userId, "password_change", `Password changed for user ${user.name}`)
+    return true
+  }
+  return false
+}
+
 export const getAllUsers = (): User[] => {
+  // Load from localStorage if available
+  if (typeof window !== 'undefined') {
+    const savedUsers = localStorage.getItem('dashboard_users')
+    if (savedUsers) {
+      const parsedUsers = JSON.parse(savedUsers)
+      Object.assign(users, parsedUsers)
+    }
+  }
   return Object.values(users).map(({ password, ...user }) => user)
 }
 
 export const getUserById = (id: string): User | null => {
+  // Load from localStorage if available
+  if (typeof window !== 'undefined') {
+    const savedUsers = localStorage.getItem('dashboard_users')
+    if (savedUsers) {
+      const parsedUsers = JSON.parse(savedUsers)
+      Object.assign(users, parsedUsers)
+    }
+  }
   const user = Object.values(users).find((u) => u.id === id)
   if (user) {
     const { password, ...userWithoutPassword } = user
@@ -291,10 +326,26 @@ export const getUserById = (id: string): User | null => {
 }
 
 export const getAllPages = (): Page[] => {
+  // Load from localStorage if available
+  if (typeof window !== 'undefined') {
+    const savedPages = localStorage.getItem('dashboard_pages')
+    if (savedPages) {
+      const parsedPages = JSON.parse(savedPages)
+      Object.assign(pages, parsedPages)
+    }
+  }
   return Object.values(pages)
 }
 
 export const getPageById = (id: string): Page | null => {
+  // Load from localStorage if available
+  if (typeof window !== 'undefined') {
+    const savedPages = localStorage.getItem('dashboard_pages')
+    if (savedPages) {
+      const parsedPages = JSON.parse(savedPages)
+      Object.assign(pages, parsedPages)
+    }
+  }
   return pages[id] || null
 }
 
@@ -303,6 +354,10 @@ export const updateUser = (userId: string, updates: Partial<User>): boolean => {
   if (userEntry) {
     const [username, user] = userEntry
     users[username] = { ...user, ...updates }
+    // Save to localStorage for persistence
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('dashboard_users', JSON.stringify(users))
+    }
     logActivity(userId, "user_update", `User ${user.name} updated`)
     return true
   }
@@ -313,6 +368,10 @@ export const updateUserStatus = (userId: string, isActive: boolean): boolean => 
   const user = Object.values(users).find((u) => u.id === userId)
   if (user) {
     user.isActive = isActive
+    // Save to localStorage for persistence
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('dashboard_users', JSON.stringify(users))
+    }
     logActivity(userId, "status_change", `User status changed to ${isActive ? "active" : "inactive"}`)
     return true
   }
@@ -323,6 +382,10 @@ export const deleteUser = (userId: string): boolean => {
   const userEntry = Object.entries(users).find(([_, user]) => user.id === userId)
   if (userEntry) {
     delete users[userEntry[0]]
+    // Save to localStorage for persistence
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('dashboard_users', JSON.stringify(users))
+    }
     logActivity(userId, "delete", `User deleted`)
     return true
   }
@@ -333,6 +396,10 @@ export const assignPagesToUser = (userId: string, pageIds: string[]): boolean =>
   const user = Object.values(users).find((u) => u.id === userId)
   if (user) {
     user.assignedPages = pageIds
+    // Save to localStorage for persistence
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('dashboard_users', JSON.stringify(users))
+    }
     logActivity(userId, "page_assignment", `Pages assigned: ${pageIds.join(", ")}`)
     return true
   }
@@ -348,6 +415,10 @@ export const createPage = (pageData: Omit<Page, "id" | "createdAt" | "updatedAt"
   }
 
   pages[newPage.id] = newPage
+  // Save to localStorage for persistence
+  if (typeof window !== 'undefined') {
+    localStorage.setItem('dashboard_pages', JSON.stringify(pages))
+  }
   logActivity(pageData.createdBy, "page_create", `Created page: ${pageData.title}`)
   return newPage
 }
@@ -355,6 +426,10 @@ export const createPage = (pageData: Omit<Page, "id" | "createdAt" | "updatedAt"
 export const updatePage = (pageId: string, updates: Partial<Page>): boolean => {
   if (pages[pageId]) {
     pages[pageId] = { ...pages[pageId], ...updates, updatedAt: new Date() }
+    // Save to localStorage for persistence
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('dashboard_pages', JSON.stringify(pages))
+    }
     logActivity(updates.createdBy || "system", "page_update", `Updated page: ${pages[pageId].title}`)
     return true
   }
@@ -365,6 +440,10 @@ export const deletePage = (pageId: string, userId: string): boolean => {
   if (pages[pageId]) {
     const pageTitle = pages[pageId].title
     delete pages[pageId]
+    // Save to localStorage for persistence
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('dashboard_pages', JSON.stringify(pages))
+    }
     logActivity(userId, "page_delete", `Deleted page: ${pageTitle}`)
     return true
   }

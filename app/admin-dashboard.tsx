@@ -70,6 +70,7 @@ export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) 
   const [showUserSettingsModal, setShowUserSettingsModal] = useState(false)
   const [selectedUserForSettings, setSelectedUserForSettings] = useState<User | null>(null)
   const [viewingUserPage, setViewingUserPage] = useState<{ user: User; page: Page } | null>(null)
+  const [previewingUser, setPreviewingUser] = useState<User | null>(null)
 
   useEffect(() => {
     loadData()
@@ -135,12 +136,30 @@ export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) 
     setCurrentPage("user-page-view")
   }
 
+  const handlePreviewUserDashboard = (userData: User) => {
+    setPreviewingUser(userData)
+    setCurrentPage("user-dashboard-preview")
+  }
+
   const sidebarItems = [
     { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
     { id: "users", label: "User Management", icon: Users },
     { id: "pages", label: "Page Management", icon: FileText },
     { id: "user-pages", label: "User Pages", icon: BarChart3 },
   ]
+
+  const renderUserDashboardPreview = () => {
+    if (!previewingUser) return null
+    
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Preview: {previewingUser.name}'s Dashboard</h2>
+        </div>
+        <UserDashboardEditor user={previewingUser} currentUserRole={user.role as any} onBack={() => setCurrentPage("user-pages")} />
+      </div>
+    )
+  }
 
   const sidebar = (
     <nav className="px-4 space-y-2">
@@ -553,6 +572,13 @@ export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) 
                           Manage Access
                         </button>
                         <button
+                          onClick={() => handlePreviewUserDashboard(userData)}
+                          className="px-3 py-2 bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 rounded-lg hover:bg-green-200 dark:hover:bg-green-800 transition-colors text-sm flex items-center gap-1"
+                        >
+                          <Eye size={14} />
+                          Preview
+                        </button>
+                        <button
                           onClick={() => handleViewUser(userData.id)}
                           className="px-3 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors text-sm"
                         >
@@ -833,6 +859,9 @@ export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) 
             </div>
           )
         }
+
+      case "user-dashboard-preview":
+        return renderUserDashboardPreview()
 
       default:
         return null

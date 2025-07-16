@@ -50,6 +50,10 @@ export function PageCreationModal({ isOpen, onClose, onSuccess, userId }: PageCr
         htmlContent: "",
         allowedRoles: ["admin", "developer", "user"],
       })
+      // Force reload data to show new page immediately
+      setTimeout(() => {
+        window.location.reload()
+      }, 500)
     } catch (err) {
       setError("Failed to create page")
     } finally {
