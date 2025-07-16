@@ -209,19 +209,17 @@ let activityLogs: ActivityLog[] = [
 
 export const authenticate = (username: string, password: string): User | null => {
   const user = users[username]
+  console.log("Checking user:", user)
+
   if (user && user.password === password) {
-    // Update last login
     user.lastLogin = new Date()
-
-    // Log activity
     logActivity(user.id, "login", `${user.name} logged in`)
-
     const { password: _, ...userWithoutPassword } = user
     return userWithoutPassword
   }
+
   return null
 }
-
 export const getUserByPhone = (phone: string): (User & { password: string }) | null => {
   return Object.values(users).find((user) => user.phone === phone) || null
 }
