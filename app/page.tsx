@@ -3,6 +3,7 @@
 import type React from "react"
 
 import { useState, useEffect } from "react"
+import { getAllUsers, getAllPages } from "@/lib/auth"
 import { authenticate, type User } from "@/lib/auth"
 import { AuthLayout } from "@/components/auth-layout"
 import { LoadingSpinner } from "@/components/loading-spinner"
